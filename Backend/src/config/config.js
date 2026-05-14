@@ -4,9 +4,13 @@ dotenv.config();
 if(!process.env.MONGO_URI){
     throw new Error("Mongo Url is not defined ")
 }
+if(!process.env.JWT_SECRET){
+    throw new Error("Jwt secret is not defined in environment variables. ")
+}
 
 const config ={
-    MONGO_URI: process.env.MONGO_URI
+    MONGO_URI: process.env.MONGO_URI,
+    JWT_SECRET: process.env.JWT_SECRET
 }
 
 export default config
