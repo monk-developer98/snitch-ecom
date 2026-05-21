@@ -283,6 +283,8 @@ const Register = () => {
 
                             {/* Google SSO */}
                             {/* <ContinueWithGoogle /> */}
+                            <a href="/api/auth/google" className="text-sm  text-[#303030] ">
+                            Continue with google</a>
 
                             {/* Footer Link */}
                             <p className="text-center text-[11px]" style={{ color: '#B5ADA3' }}>
