@@ -2,7 +2,7 @@ import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken"
 import {config} from "../config/config.js";
 
-async function sendTokenRespopnse(req,res,message) {
+async function sendTokenRespopnse(user,res,message) {
     const token = jwt.sign({
         id:user._id,
     },config.JWT_SECRET,{
