@@ -12,9 +12,9 @@ function validateRequest(req,res,next){
 export const validateRegisterUser = [
     body("email")
         .isEmail().withMessage("Invalid email format"),
-    body("contact")
-        .notEmpty().withMessage("Contact is required")
-        .matches(/^\d{10}$/).withMessage("Contact must be 10 digit number"),
+    // body("contact")
+    //     .notEmpty().withMessage("Contact is required")
+    //     .matches(/^\d{10}$/).withMessage("Contact must be 10 digit number"),
     body("password")
         .isLength({min:6}).withMessage("Pasword must be 6 character long"),
     body("fullname")

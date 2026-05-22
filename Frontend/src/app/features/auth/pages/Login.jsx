@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from "../hook/useAuth";
 import { useNavigate } from "react-router";
+import ContinueWithGoogle from "../components/ContinueWithGoogle"
 
 const Login = () => {
     const { handleLogin } = useAuth();
@@ -212,7 +213,7 @@ const Login = () => {
                             </div>
 
                             {/* Google SSO */}
-                            {/* <ContinueWithGoogle /> */}
+                            <ContinueWithGoogle/>
 
                             {/* Footer Link */}
                             <p className="text-center text-[11px]" style={{ color: '#B5ADA3' }}>

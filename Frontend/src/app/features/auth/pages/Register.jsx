@@ -2,6 +2,7 @@
 import { useAuth } from "../hook/useAuth";
 import { useNavigate } from 'react-router';
 import { useState } from "react";
+import ContinueWithGoogle from "../components/ContinueWithGoogle";
 
 const Register = () => {
     const { handleRegister } = useAuth();
@@ -282,7 +283,7 @@ const Register = () => {
                             </div>
 
                             {/* Google SSO */}
-                            {/* <ContinueWithGoogle /> */}
+                            <ContinueWithGoogle />
                             <a href="/api/auth/google" className="text-sm  text-[#303030] ">
                             Continue with google</a>
 
