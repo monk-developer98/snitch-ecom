@@ -1,5 +1,5 @@
-import {setUser} from "../state/auth.slice";
-import {login, register} from "../service/auth.api"
+import {setLoading, setUser} from "../state/auth.slice";
+import {getMe, login, register} from "../service/auth.api"
 import { useDispatch } from "react-redux";
 
 export const useAuth = ()=>{
@@ -16,9 +16,21 @@ export const useAuth = ()=>{
     }
 
 
+    async function handleGetme() {
+        try {
+            dispatch(setLoading(true))
+            const data = await getMe()
+            dispatch(setUser(data.user))
+            
+        } catch (error) {
+            console.log(error);
+        }finally{
+            dispatch( setLoading(false) )
+        }
+    }
 
 
 
 
-    return { handleRegister, handleLogin }
+    return { handleRegister, handleLogin , handleGetme }
 }
