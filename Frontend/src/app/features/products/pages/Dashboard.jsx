@@ -13,7 +13,7 @@ const Dashboard = () => {
         handleGetSellerProduct()
     },[])
 
-    console.log(sellerProducts);
+    // console.log(sellerProducts);
   return (
     <>
             {/* Google Fonts */}

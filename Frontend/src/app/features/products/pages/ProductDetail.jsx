@@ -18,6 +18,7 @@ const ProductDetail = () => {
         fetchProductDetails()
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[productId])
+    
     console.log(product);
     // const displayImages = (activeVariant?.images && activeVariant.images.length > 0)
     //     ? activeVariant.images
@@ -67,7 +68,7 @@ const ProductDetail = () => {
                             <div className="relative w-full aspect-4/5 overflow-hidden group" style={{ backgroundColor: '#f5f3f0' }}>
                                 <img
                                     // src={displayImages[ selectedImage ]?.url || displayImages[ 0 ].url}
-                                    alt={product.title}
+                                    alt={product?.title}
                                     className="w-full h-full object-cover transition-opacity duration-500"
 
                                 />
@@ -105,7 +106,7 @@ const ProductDetail = () => {
                                 className="text-4xl md:text-5xl lg:text-6xl font-light leading-[1.05] mb-6"
                                 style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1b1c1a' }}
                             >
-                                {product.title}
+                                {product?.title}
                             </h1>
 
                             <div className="mb-8">
@@ -157,7 +158,7 @@ const ProductDetail = () => {
                                     The Details
                                 </h3>
                                 <p className="text-sm leading-relaxed" style={{ color: '#7A6E63' }}>
-                                    {product.description}
+                                    {product?.description}
                                 </p>
                             </div>
 
@@ -208,7 +209,7 @@ const ProductDetail = () => {
                             </div>
 
                             {/* Extra elegant details */}
-                            <div className="mt-14 space-y-4 text-[10px] uppercase tracking-[0.1em]" style={{ color: '#B5ADA3' }}>
+                            <div className="mt-14 space-y-4 text-[10px] uppercase tracking-0.1em" style={{ color: '#B5ADA3' }}>
                                 <div className="flex justify-between border-b pb-3" style={{ borderColor: '#e4e2df' }}>
                                     <span>Shipping</span>
                                     <span>Complimentary over INR 15,000</span>
