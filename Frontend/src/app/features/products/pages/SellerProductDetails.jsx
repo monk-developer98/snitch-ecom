@@ -50,7 +50,7 @@ const SellerProductDetails = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[productId])
     
-    console.log(product);
+    // console.log(product);
 
      // Handlers for modifying existing variant stock natively
     const handleStockChange = (index, newStock) => {
