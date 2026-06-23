@@ -1,32 +1,112 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useParams } from "react-router";
 import { useProduct } from "../hook/useProduct";
-import { useEffect, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 
 const ProductDetail = () => {
     const {handleProductById} = useProduct()
     const { productId} = useParams()
     const [product , setProduct] = useState(null)
+    const [ selectedImage, setSelectedImage ] = useState(0);
+    const [ selectedAttributes, setSelectedAttributes ] = useState({});
 
-
-    async function fetchProductDetails() {
-        const data = await handleProductById(productId)
-        setProduct(data)
+     async function fetchProductDetails() {
+        try {
+            const data = await handleProductById(productId);
+            // Handle both cases depending on how API is structured
+            setProduct(data?.product || data);
+        } catch (error) {
+            console.error("Failed to fetch product details", error);
+        }
     }
 
     useEffect(()=>{
         fetchProductDetails()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[productId])
-    
-    console.log(product);
-    // const displayImages = (activeVariant?.images && activeVariant.images.length > 0)
-    //     ? activeVariant.images
-    //     : (product.images && product.images.length > 0 ? product.images : [ { url: '/snitch_editorial_warm.png' } ]);
 
-    // const displayPrice = activeVariant?.price?.amount
-    //     ? activeVariant.price
-    //     : product.price;
+    useEffect(() => {
+        if (product?.variants?.length > 0) {
+            setSelectedAttributes(product.variants[ 0 ].attributes || {});
+        }
+    }, [ product ]);
+
+    const activeVariant = useMemo(() => {
+        if (!product?.variants || product.variants.length === 0) return null;
+        return product.variants.find(v => {
+            if (!v.attributes) return false;
+            const vKeys = Object.keys(v.attributes);
+            const sKeys = Object.keys(selectedAttributes);
+            const isMatch = vKeys.every(k => v.attributes[ k ] === selectedAttributes[ k ]);
+            // If they don't have exactly the same keys, they shouldn't perfectly match, 
+            // but we might only care about matching what's available.
+            return vKeys.length === sKeys.length && isMatch;
+        });
+    }, [ product, selectedAttributes ]);
+
+    const availableAttributes = useMemo(() => {
+        if (!product?.variants) return {};
+        const attrs = {};
+        product.variants.forEach(variant => {
+            if (variant.attributes) {
+                Object.entries(variant.attributes).forEach(([ key, value ]) => {
+                    if (!attrs[ key ]) attrs[ key ] = new Set();
+                    attrs[ key ].add(value);
+                });
+            }
+        });
+        Object.keys(attrs).forEach(key => {
+            attrs[ key ] = Array.from(attrs[ key ]);
+        });
+        return attrs;
+    }, [ product ]);
+
+    
+    useEffect(() => {
+        setSelectedImage(0);
+    }, [ activeVariant ]);
+
+    const handleAttributeChange = (attrName, value) => {
+        const newAttrs = { ...selectedAttributes, [ attrName ]: value };
+
+        // Find if an exact match exists for this combination
+        const exactMatch = product.variants.find(v => {
+            const vAttrs = v.attributes || {};
+            return Object.keys(newAttrs).every(k => newAttrs[ k ] === vAttrs[ k ]) &&
+                Object.keys(vAttrs).every(k => newAttrs[ k ] === vAttrs[ k ]);
+        });
+
+        if (exactMatch) {
+            setSelectedAttributes(exactMatch.attributes);
+        } else {
+            // Find any variant that has this newly selected attribute to fallback nicely
+            const fallbackVariant = product.variants.find(v => v.attributes && v.attributes[ attrName ] === value);
+            if (fallbackVariant) {
+                setSelectedAttributes(fallbackVariant.attributes);
+            } else {
+                setSelectedAttributes(newAttrs);
+            }
+        }
+    };
+
+     if (!product) {
+        return (
+            <div className="min-h-screen flex items-center justify-center selection:bg-[#C9A96E]/30" style={{ backgroundColor: '#fbf9f6' }}>
+                <p style={{ fontFamily: "'Inter', sans-serif", color: '#B5ADA3' }} className="text-[10px] uppercase tracking-[0.2em] font-medium animate-pulse">
+                    Retrieving piece...
+                </p>
+            </div>
+        );
+    }
+    
+    const displayImages = (activeVariant?.images && activeVariant.images.length > 0)
+        ? activeVariant.images
+        : (product.images && product.images.length > 0 ? product.images : [ { url: '/snitch_editorial_warm.png' } ]);
+
+        const displayPrice = activeVariant?.price?.amount
+        ? activeVariant.price
+        : product.price;
+        console.log(product);
   return (
    <>
             {/* Google Fonts */}
@@ -47,13 +127,13 @@ const ProductDetail = () => {
                         <div className="w-full lg:w-[70%] flex flex-col-reverse md:flex-row gap-4 lg:gap-6">
 
                             {/* Thumbnails (Vertical on Desktop, Horizontal on Mobile) */}
-                            {/* {displayImages.length > 1 && (
+                            {displayImages.length > 1 && (
                                 <div className="flex flex-row md:flex-col gap-4 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 scrollbar-hide w-full md:w-20 lg:w-24 flex-shrink-0 md:max-h-[calc(100vh-200px)]">
                                     {displayImages.map((img, idx) => (
                                         <button
                                             key={idx}
                                             onClick={() => setSelectedImage(idx)}
-                                            className={`flex-shrink-0 w-20 md:w-full aspect-[4/5] overflow-hidden transition-all duration-300 ${selectedImage === idx ? 'opacity-100 ring-1 ring-[#C9A96E] ring-offset-2' : 'opacity-50 hover:opacity-100'}`}
+                                            className={`shrink-0 w-20 md:w-full aspect-4/5 overflow-hidden transition-all duration-300 ${selectedImage === idx ? 'opacity-100 ring-1 ring-[#C9A96E] ring-offset-2' : 'opacity-50 hover:opacity-100'}`}
                                             style={{ backgroundColor: '#f5f3f0', '--tw-ring-offset-color': '#fbf9f6' }}
                                         >
                                             <img
@@ -62,17 +142,17 @@ const ProductDetail = () => {
                                         </button>
                                     ))}
                                 </div>
-                            )} */}
+                            )}
 
                             {/* Main Image */}
                             <div className="relative w-full aspect-4/5 overflow-hidden group" style={{ backgroundColor: '#f5f3f0' }}>
                                 <img
-                                    // src={displayImages[ selectedImage ]?.url || displayImages[ 0 ].url}
+                                    src={displayImages[ selectedImage ]?.url || displayImages[ 0 ].url}
                                     alt={product?.title}
                                     className="w-full h-full object-cover transition-opacity duration-500"
 
                                 />
-                                {/* {displayImages.length > 1 && (
+                                {displayImages.length > 1 && (
                                     <>
                                         <button
                                             onClick={() => setSelectedImage(prev => prev === 0 ? displayImages.length - 1 : prev - 1)}
@@ -85,7 +165,7 @@ const ProductDetail = () => {
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M15 19l-7-7 7-7" /></svg>
                                         </button>
                                         <button
-                                            // onClick={() => setSelectedImage(prev => prev === displayImages.length - 1 ? 0 : prev + 1)}
+                                            onClick={() => setSelectedImage(prev => prev === displayImages.length - 1 ? 0 : prev + 1)}
                                             className="absolute right-4 lg:right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 border"
                                             style={{ backgroundColor: 'rgba(251,249,246,0.8)', borderColor: '#e4e2df', color: '#1b1c1a' }}
                                             onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fbf9f6'}
@@ -95,7 +175,7 @@ const ProductDetail = () => {
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M9 5l7 7-7 7" /></svg>
                                         </button>
                                     </>
-                                )} */}
+                                )}
                             </div>
                         </div>
 
@@ -114,14 +194,14 @@ const ProductDetail = () => {
                                     className="text-sm uppercase tracking-[0.2em] font-medium"
                                     style={{ color: '#1b1c1a' }}
                                 >
-                                    {/* {displayPrice?.currency} {displayPrice?.amount?.toLocaleString()} */}
+                                    {displayPrice?.currency} {displayPrice?.amount?.toLocaleString()}
                                 </span>
                             </div>
 
                             <div className="h-px w-full mb-8" style={{ backgroundColor: '#e4e2df' }} />
 
                             {/* Options/Variants */}
-                            {/* {Object.entries(availableAttributes).map(([ attrName, values ]) => (
+                            {Object.entries(availableAttributes).map(([ attrName, values ]) => (
                                 <div key={attrName} className="mb-6">
                                     <h3 className="text-[10px] uppercase tracking-[0.24em] font-medium mb-3" style={{ color: '#C9A96E' }}>
                                         {attrName}
@@ -142,16 +222,16 @@ const ProductDetail = () => {
                                         })}
                                     </div>
                                 </div>
-                            ))} */}
+                            ))}
 
                             {/* Stock Information */}
-                            {/* {activeVariant && activeVariant.stock !== undefined && (
+                            {activeVariant && activeVariant.stock !== undefined && (
                                 <div className="mb-6">
                                     <span className={`text-[10px] uppercase tracking-[0.2em] font-medium ${activeVariant.stock > 0 ? 'text-green-700' : 'text-red-700'}`}>
                                         {activeVariant.stock > 0 ? `${activeVariant.stock} in stock` : 'Out of stock'}
                                     </span>
                                 </div>
-                            )} */}
+                            )}
 
                             <div className="mb-12">
                                 <h3 className="text-[10px] uppercase tracking-[0.24em] font-medium mb-4" style={{ color: '#C9A96E' }}>
