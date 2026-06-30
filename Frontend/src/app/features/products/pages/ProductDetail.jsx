@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useParams } from "react-router";
 import { useProduct } from "../hook/useProduct";
+import { useCart } from "../../cart/hooks/useCart";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -11,7 +12,9 @@ const ProductDetail = () => {
     const [ selectedImage, setSelectedImage ] = useState(0);
     const [ selectedAttributes, setSelectedAttributes ] = useState({});
 
-     async function fetchProductDetails() {
+    const {handleAddItem} = useCart()
+
+    async function fetchProductDetails() {
         try {
             const data = await handleProductById(productId);
             // Handle both cases depending on how API is structured
@@ -98,6 +101,8 @@ const ProductDetail = () => {
             </div>
         );
     }
+
+    console.log("PR-",product);
     
     const displayImages = (activeVariant?.images && activeVariant.images.length > 0)
         ? activeVariant.images
@@ -106,7 +111,6 @@ const ProductDetail = () => {
         const displayPrice = activeVariant?.price?.amount
         ? activeVariant.price
         : product.price;
-        console.log(product);
   return (
    <>
             {/* Google Fonts */}
@@ -259,12 +263,12 @@ const ProductDetail = () => {
                                         e.currentTarget.style.backgroundColor = '#1b1c1a';
                                         e.currentTarget.style.color = '#fbf9f6';
                                     }}
-                                    // onClick={() => {
-                                    //     handleAddItem({
-                                    //         productId: product._id,
-                                    //         variantId: activeVariant._id
-                                    //     })
-                                    // }}
+                                    onClick={() => {
+                                        handleAddItem({
+                                            productId: product._id,
+                                            variantId: activeVariant._id
+                                        })
+                                    }}
                                 >
                                     Add to Cart
                                 </button>

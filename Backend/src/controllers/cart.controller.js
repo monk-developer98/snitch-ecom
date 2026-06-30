@@ -65,3 +65,26 @@ export const addToCart = async (req,res)=>{
         success: true
     })
 }
+
+/**
+ * @route   GET /api/cart
+ * @desc    GET user's cart
+ * @access Private
+ */
+
+
+export const getCart = async(req,res)=>{
+    const user = req.user;
+
+    let cart = await cartModel.findOne({user:user._id}).populate("items.product")
+
+    if(!cart){
+        cart = await cartModel.create({user: user._id})
+    }
+
+    return res.status(200).json({
+        message:"Cart fetched successfully ",
+        success:true,
+        cart
+    })
+}
