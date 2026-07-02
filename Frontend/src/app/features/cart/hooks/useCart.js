@@ -1,6 +1,7 @@
-import { addItem } from "../service/cart.api";
+/* eslint-disable no-unused-vars */
+import { addItem, getCart , incrementCartItemApi } from "../service/cart.api";
 import { useDispatch } from "react-redux";
-import {addItem as addItemToCart} from '../state/cart.slice';
+import {addItem as addItemToCart , incrementCartItem, setItems} from '../state/cart.slice';
 
 export const useCart = () =>{
     const dispatch = useDispatch()
@@ -11,5 +12,16 @@ export const useCart = () =>{
         return data
     }
 
-    return { handleAddItem}
+    async function handleGetCart() {
+        const data = await getCart()
+        dispatch(setItems(data.cart.items))
+    }
+
+    async function handleIncrementCartItem({productId , variantId}) {
+        console.log(productId , variantId);
+        const data = await incrementCartItemApi({productId,variantId})
+        dispatch(incrementCartItem({productId,variantId}))
+    }
+
+    return { handleAddItem , handleGetCart , handleIncrementCartItem}
 }
